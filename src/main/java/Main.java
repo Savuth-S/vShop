@@ -1,9 +1,37 @@
 package main.java;
 
+import java.util.logging.Logger;
+
+import main.java.database.Database;
+
 public class Main
 {
-        public static void main(String[] args)
-        {
-                System.out.println("LOL");
-        }
+	static Database dbHelper;
+	
+	//MAIN PROGRAM
+	public static void main(String[] args)
+    {
+		dbHelper = new Database(
+				"jdbc:mariadb://localhost:3306/", 
+				"root", 
+				"root");
+		
+		if (init()) {
+			Logger.getLogger(Main.class.getName())
+					.info("INIT SUCCES!");
+    	}else {
+			Logger.getLogger(Main.class.getName())
+					.severe("INIT FAILED!");
+    	}
+    	
+    }
+	
+	//LOGIC
+	private static boolean init() {
+		if (dbHelper != null) {
+			return dbHelper.init();
+		}
+		
+		return false;
+	}
 }
