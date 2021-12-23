@@ -21,4 +21,8 @@ public class Log extends Table
 		setTableName(TB_NAME);
 		setFields(FIELDS);
 	}
+
+	@Override
+	String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s), UNIQUE KEY(%s), UNIQUE KEY(%s)",
+			ID, Admins.UAID, Catalog.UGID, Users.UUID); }
 }
