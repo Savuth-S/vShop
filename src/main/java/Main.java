@@ -6,17 +6,15 @@ import main.java.database.Database;
 
 public class Main
 {
-	static Database dbHelper;
-	
 	//MAIN PROGRAM
 	public static void main(String[] args)
     {
-		dbHelper = new Database(
-				"jdbc:mariadb://localhost:3306/", 
-				"root", 
-				"root");
+		Database.getInstance( new Database(
+				"jdbc:mariadb://localhost:3306/",
+				"root",
+				"root"));
 		
-		if (init()) {
+			if (init()) {
 			Logger.getLogger(Main.class.getName())
 					.info("INIT SUCCES!");
     	}else {
@@ -28,8 +26,10 @@ public class Main
 	
 	//LOGIC
 	private static boolean init() {
-		if (dbHelper != null) {
-			return dbHelper.init();
+		try (Database db = Database.getInstance()){
+			if (db != null){
+				return db.init();
+			}
 		}
 		
 		return false;

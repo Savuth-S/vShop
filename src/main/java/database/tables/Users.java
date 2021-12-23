@@ -1,47 +1,32 @@
 package main.java.database.tables;
 
-import java.sql.*;
-import java.util.Arrays;
-
-public class Users implements Table
+public class Users extends Table
 { //POSIBLE FUTURO SINGLETON
 	private static final String TB_NAME = "usuarios";
-	private static final String ID = "id";
-	private static final String UUID = "uuid";
+
+	public static final String UUID = "user_id";
 	private static final String NAME = "nombre";
 	private static final String EMAIL = "email";
 	private static final String PASSWORD = "password";
 	private static final String BALANCE = "balance";
-	
-	private static final String[] fields = new String[] {
+	private static final String LIBRARY = "juegos_rentados";
+	private static final String LIST_LIBRARY = "lista_juegos_rentados";
+	private static final String[] FIELDS = new String[] {
 			ID,
 			UUID,
 			NAME,
 			EMAIL,
 			PASSWORD,
-			BALANCE
+			BALANCE,
+			LIBRARY,
+			LIST_LIBRARY
 	};
-	
-	public void create(Connection connection){
-		String sql = String.format("CREATE TABLE IF NOT EXISTS %s (%s)", TB_NAME, getFieldsQuery());
 
-		try (Statement cmnd = connection.createStatement()){
-			cmnd.execute(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public Users(){
+		setTableName(TB_NAME);
+		setFields(FIELDS);
 	}
 
-	public String getFieldsQuery() {
-		StringBuilder sb = new StringBuilder();
-		Arrays.stream(fields).forEach(s -> {
-			if (s.equals(ID)){
-				sb.append(String.format("%1$s int NOT NULL AUTO_INCREMENT, PRIMARY KEY (%1$s)", s));
-			}else{
-				sb.append(String.format(", %s VARCHAR(30) NOT NULL", s));
-			}
-		});
-
-		return sb.toString();
-	}
+	@Override
+	String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UUID); }
 }

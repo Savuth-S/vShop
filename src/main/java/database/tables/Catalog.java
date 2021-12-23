@@ -1,46 +1,32 @@
 package main.java.database.tables;
 
-import java.sql.*;
-import java.util.Arrays;
-
-public class Catalog implements Table{ //POSIBLE FUTURO SINGLETON
+public class Catalog extends Table
+{ //POSIBLE FUTURO SINGLETON
 	public static final String TB_NAME = "catalogo";
-	private static final String ID = "id";
-	private static final String UUID = "user_unique_id";
+
+	public static final String UGID = "game_id";
 	private static final String NAME = "nombre";
-	private static final String EMAIL = "email";
-	private static final String PASSWORD = "password";
-	private static final String BALANCE = "balance";
-	
-	private static final String[] fields = new String[] {
+	private static final String RELEASE = "fecha_de_salida";
+	private static final String PLATFORM = "plataforma";
+	private static final String COMPANY = "productora";
+	private static final String DIRECTOR = "director";
+	private static final String MAIN_CHAR = "protagonista";
+	private static final String[] FIELDS = new String[] {
 			ID,
-			UUID,
+			UGID,
 			NAME,
-			EMAIL,
-			PASSWORD,
-			BALANCE
+			RELEASE,
+			PLATFORM,
+			COMPANY,
+			DIRECTOR,
+			MAIN_CHAR
 	};
 
-	public void create(Connection connection){
-		String sql = String.format("CREATE TABLE IF NOT EXISTS %s (%s)", TB_NAME, getFieldsQuery());
-
-		try (Statement cmnd = connection.createStatement()){
-			cmnd.execute(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public Catalog(){
+		setTableName(TB_NAME);
+		setFields(FIELDS);
 	}
 
-	public String getFieldsQuery() {
-		StringBuilder sb = new StringBuilder();
-		Arrays.stream(fields).forEach(s -> {
-			if (s.equals(ID)){
-				sb.append(String.format("%1$s int NOT NULL AUTO_INCREMENT, PRIMARY KEY (%1$s)", s));
-			}else{
-				sb.append(String.format(", %s VARCHAR(30) NOT NULL", s));
-			}
-		});
-
-		return sb.toString();
-	}
+	@Override
+	String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UGID); }
 }

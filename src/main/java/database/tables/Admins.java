@@ -1,46 +1,74 @@
 package main.java.database.tables;
 
-import java.sql.*;
-import java.util.Arrays;
+import com.google.common.hash.Hashing;
+import main.java.database.Database;
 
-public class Admins implements Table{ //POSIBLE FUTURO SINGLETON
-	public static final String TB_NAME = "administradores";
-	private static final String ID = "id";
-	private static final String UUID = "user_unique_id";
-	private static final String NAME = "nombre";
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.logging.Logger;
+
+public class Admins extends Table
+{
+	private static final Logger LOGGER = Logger.getLogger(Admins.class.getName());
+
+	//TABLE LOGIC
+	private static final String TB_NAME = "administradores";
+
+	public static final String UAID = "admin_id";
 	private static final String EMAIL = "email";
 	private static final String PASSWORD = "password";
 	private static final String BALANCE = "balance";
-	
-	private static final String[] fields = new String[] {
+	private static final String DATE = "fecha";
+	private static final String[] FIELDS = new String[] {
 			ID,
-			UUID,
-			NAME,
+			UAID,
 			EMAIL,
 			PASSWORD,
-			BALANCE
+			BALANCE,
+			DATE
 	};
 
-	public void create(Connection connection){
-		String sql = String.format("CREATE TABLE IF NOT EXISTS %s (%s)", TB_NAME, getFieldsQuery());
-
-		try (Statement cmnd = connection.createStatement()){
-			cmnd.execute(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public Admins()
+	{
+		setTableName(TB_NAME);
+		setFields(FIELDS);
 	}
 
-	public String getFieldsQuery() {
-		StringBuilder sb = new StringBuilder();
-		Arrays.stream(fields).forEach(s -> {
-			if (s.equals(ID)){
-				sb.append(String.format("%1$s int NOT NULL AUTO_INCREMENT, PRIMARY KEY (%1$s)", s));
-			}else{
-				sb.append(String.format(", %s VARCHAR(30) NOT NULL", s));
-			}
-		});
+	@Override
+	String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UAID); }
 
-		return sb.toString();
+	public static boolean makeDefaultAdmin()
+	{
+		try (Database db = Database.getInstance()) {
+			ResultSet res = db.execute(String.format("SELECT * FROM %s WHERE %s = 1 LIMIT 1", TB_NAME, ID));
+			if (!res.first()) {
+				LOGGER.info("Cannot find default admin will try to make it.");
+				return addNewAdmin("carlos@wposs.com", "123456");
+			} else {
+				return true;
+			}
+		}catch (SQLException e) {
+			LOGGER.warning(String.format("FAILED TO MAKE ADMIN %s", e.getMessage()));
+		}
+
+		return false;
+	}
+
+	private static boolean addNewAdmin(String email, String password){ return addNewAdmin(email, password, "0");}
+	private static boolean addNewAdmin(String email, String password, String initialBalance)
+	{
+		try (Database db = Database.getInstance()) {
+			String date = LocalDateTime.now().toString();
+			String[] data = new String[]{
+					Hashing.sha256().hashString(email+password+date, StandardCharsets.UTF_8).toString(),
+					email,
+					password,
+					initialBalance,
+					date
+			};
+
+			return db.insert(TB_NAME, FIELDS, data) != null;
+		}
 	}
 }

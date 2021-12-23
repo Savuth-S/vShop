@@ -1,46 +1,24 @@
 package main.java.database.tables;
 
-import java.sql.*;
-import java.util.Arrays;
+public class Log extends Table
+{ //POSIBLE FUTURO SINGLETON
+	private static final String TB_NAME = "registro";
 
-public class Log implements Table{ //POSIBLE FUTURO SINGLETON
-	private static final String TB_NAME = "usr_registro";
-	private static final String ID = "id";
-	private static final String UUID = "user_unique_id";
-	private static final String NAME = "nombre";
-	private static final String EMAIL = "email";
-	private static final String PASSWORD = "password";
-	private static final String BALANCE = "balance";
-	
-	private static final String[] fields = new String[] {
+	private static final String VALUE = "valor";
+	private static final String SALE_DATE = "fecha_de_venta";
+	private static final String RETAIL_DUE_DATE = "fecha_de_entrega";
+	private static final String[] FIELDS = new String[] {
 			ID,
-			UUID,
-			NAME,
-			EMAIL,
-			PASSWORD,
-			BALANCE
+			Admins.UAID,
+			Catalog.UGID,
+			Users.UUID,
+			VALUE,
+			SALE_DATE,
+			RETAIL_DUE_DATE
 	};
 
-	public void create(Connection connection){
-		String sql = String.format("CREATE TABLE IF NOT EXISTS %s (%s)", TB_NAME, getFieldsQuery());
-
-		try (Statement cmnd = connection.createStatement()){
-			cmnd.execute(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public String getFieldsQuery() {
-		StringBuilder sb = new StringBuilder();
-		Arrays.stream(fields).forEach(s -> {
-			if (s.equals(ID)){
-				sb.append(String.format("%1$s int NOT NULL AUTO_INCREMENT, PRIMARY KEY (%1$s)", s));
-			}else{
-				sb.append(String.format(", %s VARCHAR(30) NOT NULL", s));
-			}
-		});
-
-		return sb.toString();
+	public Log() {
+		setTableName(TB_NAME);
+		setFields(FIELDS);
 	}
 }
