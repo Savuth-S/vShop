@@ -1,3 +1,10 @@
 /.idea/
 /out/
 .class
+
+#Ignore eclipse project files
+.classpath
+
+#Misc
+.project
+.iml

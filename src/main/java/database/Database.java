@@ -35,8 +35,8 @@ public class Database implements AutoCloseable
 	public Database(String url, String user, String password)
 	{   
 		this.url = url;
-        this.usr = user;
-        this.pwd = password;
+                this.usr = user;
+                this.pwd = password;
 	}
 
 	Connection conn = null;
