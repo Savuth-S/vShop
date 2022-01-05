@@ -1,14 +1,17 @@
 package main.java.database.tables;
 
+import java.util.Arrays;
 import java.util.UUID;
 
+import main.java.database.Database;
 import main.java.database.Table;
+import main.java.utils.Crypt;
 
 public class Users extends Table
 { //POSIBLE FUTURO SINGLETON
 	private static final String TB_NAME = "usuarios";
 
-	public static final String UUID = "user_id";
+	public static final String GUID = "user_id";
 	private static final String NAME = "nombre";
 	private static final String EMAIL = "email";
 	private static final String PASSWORD = "password";
@@ -17,7 +20,7 @@ public class Users extends Table
 	private static final String LIST_LIBRARY = "lista_juegos_rentados";
 	private static final String[] FIELDS = new String[] {
 			ID,
-			UUID,
+			GUID,
 			NAME,
 			EMAIL,
 			PASSWORD,
@@ -31,6 +34,36 @@ public class Users extends Table
 		setFields(FIELDS);
 	}
 
+        private boolean addNewUser(String email, String password)
+	{
+                byte[] compressedGUID = Crypt.guidToBin(UUID.randomUUID());
+                byte[] hashedPassword = Crypt.hashPassword(password, compressedGUID);
+                
+	        Object[] data = new Object[]{
+		        compressedGUID,
+		        email,
+			hashedPassword,
+		        0 };
+
+		return insert(FIELDS, data) != null;
+	}
+
+        @Override
+        protected String getFieldsQuery()
+	{
+	        StringBuilder sb = new StringBuilder();
+	        Arrays.stream(FIELDS).forEach(s -> {
+                        switch(s){
+                                case ID -> sb.append(String.format("%s int AUTO_INCREMENT", s));
+                                case GUID -> sb.append(String.format(", %s BINARY(16) NOT NULL", s));
+                                case PASSWORD -> sb.append(String.format(", %s BINARY(48) NOT NULL", s));
+                                default -> sb.append(String.format(", %s VARCHAR(30)", s));
+                        }
+	        });
+                
+	        return sb.toString();
+	}
+
 	@Override
-	protected String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UUID); }
+	protected String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, GUID); }
 }

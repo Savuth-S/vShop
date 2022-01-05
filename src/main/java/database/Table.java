@@ -23,17 +23,17 @@ public abstract class Table {
 
 	public boolean create()
 	{
-		try (Database db = Database.getInstance()){
-			if (db.execute(String.format(
-					"CREATE TABLE IF NOT EXISTS %s (%s %s)",
-					tbName, getFieldsQuery(), getUniques())) != null){
-				return true;
+	        try (Database db = Database.getInstance()){
+		        if (db.execute(String.format(
+                                        "CREATE TABLE IF NOT EXISTS %s (%s %s)", 
+                                        tbName, getFieldsQuery(), getUniques())) != null){
+			        return true;
 			}
 		} catch (SQLException e) {e.printStackTrace();}
 
 		return false;
 	}
-
+	
         public ResultSet insert(String[] fields, Object[] data){
 	        try(Database db = Database.getInstance()) {
 		        String query = String.format("INSERT INTO %s (%s) VALUES (%s)",
@@ -62,20 +62,8 @@ public abstract class Table {
 	}
 
 
-	protected String getFieldsQuery()
-	{
-	        StringBuilder sb = new StringBuilder();
-	        Arrays.stream(fields).forEach(s -> {
-                        switch(s){
-                                case ID -> sb.append(String.format("%s int AUTO_INCREMENT", s));
-                                case "guid" -> sb.append(String.format(", %s BINARY(16) NOT NULL", s));
-                                default -> sb.append(String.format(", %s VARCHAR(30) NOT NULL", s));
-                        }
-	        });
-                
-	        return sb.toString();
-	}
-
+	protected abstract String getFieldsQuery();
+        
         protected boolean entryExists(String field, String value)
         {
                 try (Database db = Database.getInstance()) {

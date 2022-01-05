@@ -54,7 +54,7 @@ public class Database implements AutoCloseable
                 return conn;
         }
 
-	public boolean init() 
+	public boolean init(Map<String, Table> tablesMap) 
 	{
 		boolean isConnected = false;
 		AtomicBoolean areTablesMade = new AtomicBoolean(true);
@@ -78,15 +78,9 @@ public class Database implements AutoCloseable
 		}
 
 		if (isConnected) {
-			Table[] tables = new Table[]{
-					new Users(),
-					new Catalog(),
-					new Log(),
-					new Admins()
-			};
-			Arrays.stream(tables).forEach(tb -> areTablesMade.set(areTablesMade.get() && tb.create()));
+		        tablesMap.forEach((nm, tb) -> areTablesMade.set(areTablesMade.get() && tb.create()));
 
-			doesAdminExists = tables[3].entryExists(ID, "1");
+			doesAdminExists = tablesMap.get(TODOADM).entryExists(ID, "1");
 		}
 
 		return isConnected && areTablesMade.get() && doesAdminExists;

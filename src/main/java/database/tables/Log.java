@@ -1,5 +1,7 @@
 package main.java.database.tables;
 
+import java.util.Arrays;
+
 import main.java.database.Table;
 
 public class Log extends Table
@@ -12,8 +14,8 @@ public class Log extends Table
 	private static final String[] FIELDS = new String[] {
 			ID,
 			Admins.GUID,
-			Catalog.UGID,
-			Users.UUID,
+			Catalog.GUID,
+			Users.GUID,
 			VALUE,
 			SALE_DATE,
 			RETAIL_DUE_DATE
@@ -24,7 +26,22 @@ public class Log extends Table
 		setFields(FIELDS);
 	}
 
+        @Override
+        protected String getFieldsQuery()
+	{
+	        StringBuilder sb = new StringBuilder();
+	        Arrays.stream(FIELDS).forEach(s -> {
+                        switch(s){
+                                case ID -> sb.append(String.format("%s int AUTO_INCREMENT", s));
+                                case Admins.GUID, Catalog.GUID, Users.GUID -> sb.append(String.format(", %s BINARY(16) NOT NULL", s));
+                                default -> sb.append(String.format(", %s VARCHAR(30) NOT NULL", s));
+                        }
+	        });
+                
+	        return sb.toString();
+	}
+
 	@Override
 	protected String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s), UNIQUE KEY(%s), UNIQUE KEY(%s)",
-			ID, Admins.GUID, Catalog.UGID, Users.UUID); }
+			ID, Admins.GUID, Catalog.GUID, Users.GUID); }
 }
