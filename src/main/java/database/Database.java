@@ -1,11 +1,14 @@
 package main.java.database;
 
-import java.sql.*;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import java.util.logging.Logger;
 
+import java.sql.*;
+import java.util.*;
+import main.java.database.Table;
 import main.java.database.tables.*;
+import static main.java.database.Table.ID;
 
 public class Database implements AutoCloseable
 {
@@ -29,7 +32,7 @@ public class Database implements AutoCloseable
 	private final String usr;
 	private final String pwd;
 	
-	public static final String DB_NAME = "test";
+	public static final String DB_NAME = "wposshop";
 	
 	
 	public Database(String url, String user, String password)
@@ -39,11 +42,22 @@ public class Database implements AutoCloseable
                 this.pwd = password;
 	}
 
-	Connection conn = null;
+	private Connection conn = null;
+
+        public Connection getConnection()
+        {
+                if (conn != null){
+                        return conn;
+                }
+
+                connect();
+                return conn;
+        }
+
 	public boolean init() 
 	{
 		boolean isConnected = false;
-		AtomicBoolean areTablesMade = new AtomicBoolean(false);
+		AtomicBoolean areTablesMade = new AtomicBoolean(true);
 		boolean doesAdminExists = false;
 
 		if (!connect()) {
@@ -70,10 +84,9 @@ public class Database implements AutoCloseable
 					new Log(),
 					new Admins()
 			};
-			areTablesMade.set(true);
 			Arrays.stream(tables).forEach(tb -> areTablesMade.set(areTablesMade.get() && tb.create()));
 
-			doesAdminExists = Admins.makeDefaultAdmin();
+			doesAdminExists = tables[3].entryExists(ID, "1");
 		}
 
 		return isConnected && areTablesMade.get() && doesAdminExists;
@@ -138,57 +151,5 @@ public class Database implements AutoCloseable
 			}else{ LOGGER.severe("THERE IS NO EXISTING CONNECTION"); }
 
 		return null;
-	}
-
-	public ResultSet insert(String tableName, String[] fields, String[] data){
-		try{ if (conn != null && conn.isValid(30)) {
-				String query = String.format("INSERT INTO %s (%s) VALUES (%s)",
-						tableName,
-						formatFields(fields),
-						formatFieldsQueryCount(fields));
-
-				try (PreparedStatement insertValues = conn.prepareStatement(query)){
-					for (int i = 0; i < formatFields(fields).split(",").length; i++){
-						insertValues.setString(i+1, data[i]);
-					}
-
-					return insertValues.executeQuery();
-				}catch (SQLException e){ LOGGER.warning(String.format("FAILED TO INSERT ENTRY: %s %nMESSAGE: %s", query, e.getMessage())); }
-			}else{ LOGGER.severe("THERE IS NO EXISTING CONNECTION"); }
-		}catch (SQLException e){ e.printStackTrace(); }
-
-		return null;
-	}
-
-	private String formatFields(String[] fields)
-	{
-		StringBuilder sb = new StringBuilder();
-		Arrays.stream(fields).forEach(field -> {
-			if (!field.equals(Table.ID)){
-				if (field.equals(fields[1])){
-					sb.append(field);
-				}else{
-					sb.append(String.format(", %s",field));
-				}
-			}
-		});
-
-		return sb.toString();
-	}
-
-	private String formatFieldsQueryCount(String[] fields)
-	{
-		StringBuilder sb = new StringBuilder();
-		Arrays.stream(fields).forEach(field -> {
-			if (!field.equals(Table.ID)){
-				if (field.equals(fields[1])){
-					sb.append('?');
-				}else{
-					sb.append(", ?");
-				}
-			}
-		});
-
-		return sb.toString();
 	}
 }

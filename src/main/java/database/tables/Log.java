@@ -1,5 +1,7 @@
 package main.java.database.tables;
 
+import main.java.database.Table;
+
 public class Log extends Table
 { //POSIBLE FUTURO SINGLETON
 	private static final String TB_NAME = "registro";
@@ -9,7 +11,7 @@ public class Log extends Table
 	private static final String RETAIL_DUE_DATE = "fecha_de_entrega";
 	private static final String[] FIELDS = new String[] {
 			ID,
-			Admins.UAID,
+			Admins.GUID,
 			Catalog.UGID,
 			Users.UUID,
 			VALUE,
@@ -23,6 +25,6 @@ public class Log extends Table
 	}
 
 	@Override
-	String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s), UNIQUE KEY(%s), UNIQUE KEY(%s)",
-			ID, Admins.UAID, Catalog.UGID, Users.UUID); }
+	protected String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s), UNIQUE KEY(%s), UNIQUE KEY(%s)",
+			ID, Admins.GUID, Catalog.UGID, Users.UUID); }
 }

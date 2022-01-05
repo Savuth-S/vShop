@@ -1,5 +1,9 @@
 package main.java.database.tables;
 
+import java.util.UUID;
+
+import main.java.database.Table;
+
 public class Users extends Table
 { //POSIBLE FUTURO SINGLETON
 	private static final String TB_NAME = "usuarios";
@@ -28,5 +32,5 @@ public class Users extends Table
 	}
 
 	@Override
-	String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UUID); }
+	protected String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UUID); }
 }

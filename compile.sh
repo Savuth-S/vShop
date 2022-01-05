@@ -1,8 +1,10 @@
 #!/bin/bash
 
-cd /home/carlos/git/WPOSShop/
+clear
 
 cd src/
-javac -cp lib/*:. main/java/Main.java -d ../bin/debug/
-cd ../bin/debug/
-java main.java.Main
+javac -cp lib/*:. main/java/Main.java -d ../bin/
+cp -r ./lib/ ../bin/
+
+cd ../bin/
+java -cp lib/*:. main.java.Main

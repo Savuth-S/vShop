@@ -1,12 +1,12 @@
 package main.java.database.tables;
 
-import com.google.common.hash.Hashing;
-import main.java.database.Database;
+import java.util.UUID;
 
-import java.nio.charset.StandardCharsets;
-import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.logging.Logger;
+
+import main.java.database.Database;
+import main.java.database.Table;
+import main.java.utils.Utils;
 
 public class Admins extends Table
 {
@@ -15,18 +15,16 @@ public class Admins extends Table
 	//TABLE LOGIC
 	private static final String TB_NAME = "administradores";
 
-	public static final String UAID = "admin_id";
+	public static final String GUID = "guid";
 	private static final String EMAIL = "email";
 	private static final String PASSWORD = "password";
 	private static final String BALANCE = "balance";
-	private static final String DATE = "fecha";
 	private static final String[] FIELDS = new String[] {
 			ID,
-			UAID,
+			GUID,
 			EMAIL,
 			PASSWORD,
-			BALANCE,
-			DATE
+			BALANCE
 	};
 
 	public Admins()
@@ -35,40 +33,36 @@ public class Admins extends Table
 		setFields(FIELDS);
 	}
 
+	private boolean addNewAdmin(String email, String password){ return addNewAdmin(email, password, 0);}
+	private boolean addNewAdmin(String email, String password, int initialBalance)
+	{
+		try (Database db = Database.getInstance()) {
+                        byte[] compressedGUID = Utils.guidToBin(UUID.randomUUID());
+		        Object[] data = new Object[]{
+			        compressedGUID,
+			        email,
+				password,
+			        initialBalance,
+                        };
+
+			return insert(FIELDS, data) != null;
+		}
+	}
+
+        @Override
+        protected boolean entryExists(String field, String value)
+        {
+                boolean res = super.entryExists(field, value);
+
+                if (field.equals(ID) && !res){
+                       	LOGGER.info("Cannot find default admin will try to make it.");
+		        return addNewAdmin("carlos@wposs.com", "123456");
+                }
+
+                return res;
+        }
+ 
+
 	@Override
-	String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UAID); }
-
-	public static boolean makeDefaultAdmin()
-	{
-		try (Database db = Database.getInstance()) {
-			ResultSet res = db.execute(String.format("SELECT * FROM %s WHERE %s = 1 LIMIT 1", TB_NAME, ID));
-			if (!res.first()) {
-				LOGGER.info("Cannot find default admin will try to make it.");
-				return addNewAdmin("carlos@wposs.com", "123456");
-			} else {
-				return true;
-			}
-		}catch (SQLException e) {
-			LOGGER.warning(String.format("FAILED TO MAKE ADMIN %s", e.getMessage()));
-		}
-
-		return false;
-	}
-
-	private static boolean addNewAdmin(String email, String password){ return addNewAdmin(email, password, "0");}
-	private static boolean addNewAdmin(String email, String password, String initialBalance)
-	{
-		try (Database db = Database.getInstance()) {
-			String date = LocalDateTime.now().toString();
-			String[] data = new String[]{
-					Hashing.sha256().hashString(email+password+date, StandardCharsets.UTF_8).toString(),
-					email,
-					password,
-					initialBalance,
-					date
-			};
-
-			return db.insert(TB_NAME, FIELDS, data) != null;
-		}
-	}
+	protected String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, GUID); }
 }

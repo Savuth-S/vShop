@@ -1,5 +1,7 @@
 package main.java.database.tables;
 
+import main.java.database.Table;
+
 public class Catalog extends Table
 { //POSIBLE FUTURO SINGLETON
 	public static final String TB_NAME = "catalogo";
@@ -28,5 +30,5 @@ public class Catalog extends Table
 	}
 
 	@Override
-	String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UGID); }
+	protected String getUniques() { return String.format(", PRIMARY KEY (%s), UNIQUE KEY (%s)", ID, UGID); }
 }

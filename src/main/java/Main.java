@@ -10,7 +10,7 @@ public class Main
         public static void main(String[] args)
         {
 	        Database.getInstance( new Database(
-				"jdbc:mariadb://172.22.224.91:3306/",
+				"jdbc:mariadb://172.25.16.1:3306/",
 				"root",
 				"root"));
 		
@@ -25,7 +25,7 @@ public class Main
         }
 	
 	//LOGIC
-	private static boolean init() 
+	private static boolean init()
         {
 	        try (Database db = Database.getInstance()){
 			if (db != null){
