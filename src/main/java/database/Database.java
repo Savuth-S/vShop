@@ -80,7 +80,7 @@ public class Database implements AutoCloseable
 		if (isConnected) {
 		        tablesMap.forEach((nm, tb) -> areTablesMade.set(areTablesMade.get() && tb.create()));
 
-			doesAdminExists = tablesMap.get(TODOADM).entryExists(ID, "1");
+			doesAdminExists = tablesMap.get("TODOADM").entryExists(ID, "1");
 		}
 
 		return isConnected && areTablesMade.get() && doesAdminExists;
