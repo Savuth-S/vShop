@@ -1,4 +1,4 @@
-package main.java.database;
+package sav.vshop.database;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 import java.sql.*;
 import java.util.*;
 
+import sav.utils;
+
 public class Database implements AutoCloseable
 {
 	private static final Logger LOGGER = Logger.getLogger(Database.class.getName());
@@ -14,24 +16,14 @@ public class Database implements AutoCloseable
 	//SINGLETON
 	private static Database database = null;
 	
-	public static boolean makeInstance(Database db){
-		if (database == null && db != null){
-			database = db;
-			return true;
-		}else if (database != null){
-			LOGGER.info(String.format("Instance already made: %s", database)); 
-			return true;
-		}
-
-		return false;
-	}
-
 	public static Database getInstance() throws RuntimeException
 	{
 		if (database == null){
-			RuntimeException e =  new RuntimeException("Database not initialized"); 
-			LOGGER.severe(String.format("DATABASE HAS NOT BEEN INITIALIZED: %s", e.getMessage()));
-			throw e;
+			database =  new Database();
+
+			// RuntimeException e =  new RuntimeException("Database not initialized"); 
+			// LOGGER.severe(String.format("DATABASE HAS NOT BEEN INITIALIZED: %s", e.getMessage()));
+			// throw e;
 		}
 
 		database.connect();
@@ -39,33 +31,16 @@ public class Database implements AutoCloseable
 	}
 
 	//DATABASE INIT
-	private final String url;
-	private final String usr;
-	private final String pwd;
-	
+	private final String url = String.format("jdbc:mariadb://%s:%s/", Config.dbIp, Config.dbPort);
+	private final String usr = Config.dbUsr;
+	private final String pwd = Config.dbPwrd;
+	private Connection conn = null;
+
 	public static final String DB_NAME = "wposshop";
 	
+	public void setConnection(Connection conn){ this.conn = conn; }
+
 	
-	public Database(String url, String user, String password)
-	{   
-		this.url = url;
-                this.usr = user;
-                this.pwd = password;
-	}
-
-	public boolean init(Map<String, Table> tablesMap) 
-	{
-		boolean isConnected = false;
-		AtomicBoolean areTablesMade = new AtomicBoolean(true);
-		boolean doesAdminExists = false;
-
-		if (!connect()) {
-					}else{
-			isConnected = true;
-		}
-
-		return isConnected && areTablesMade.get() && doesAdminExists;
-	}
 	
 	//INNER LOGIC
 	public boolean connect()
@@ -94,7 +69,8 @@ public class Database implements AutoCloseable
 		return isConnected;
 	}
 	
-	public void close() {
+	public void close() 
+	{
 		try {
 			if (conn != null && !conn.isClosed()) {
 				if (conn.isValid(30)) {
@@ -111,12 +87,6 @@ public class Database implements AutoCloseable
 	}
 
 	
-	private boolean make() {
-		try{ return execute(String.format("CREATE DATABASE %s", DB_NAME)) != null;
-		}catch (SQLException e){ e.printStackTrace();}
-
-		return false;
-	}
 
 	public ResultSet execute(String sql) throws SQLException {
 		if (conn != null && conn.isValid(30)) {

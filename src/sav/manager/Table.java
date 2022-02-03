@@ -11,25 +11,25 @@ import java.util.logging.Logger;
 import main.java.database.Database;
 
 public abstract class Table {
-        private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
 
 	private String tbName;
 	private String[] fields;
         
-        public static final String ID = "id";
+	public static final String ID = "id";
 
 	protected void setTableName(String tbName) {this.tbName = tbName;}
 	protected void setFields(String[] fields) { this.fields = fields; }
 
 	public boolean create()
 	{
-	        try (Database db = Database.getInstance()){
-		        if (db.execute(String.format(
-                                        "CREATE TABLE IF NOT EXISTS %s (%s %s)", 
-                                        tbName, getFieldsQuery(), getUniques())) != null){
-			        return true;
+	    try (Database db = Database.getInstance()){
+			if (db.execute(String.format(
+							"CREATE TABLE IF NOT EXISTS %s (%s %s)", 
+                        	tbName, getFieldsQuery(), getUniques())) != null){
+				return true;
 			}
-		} catch (SQLException e) {e.printStackTrace();}
+		}catch (SQLException e){ e.printStackTrace(); }
 
 		return false;
 	}

@@ -1,4 +1,4 @@
-package main.java.utils;
+package sav.utils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -6,38 +6,29 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class Config
-{
-        //SINGLETON
-        public static Config config = null;
-
-        public static Config getInstance()
-        {
-                if (config == null){
-                        config = new Config();
-                        try{
-							config.load();
-               
-						}catch(Exception e){e.printStackTrace();}
-				}
-                return config;
-        }
-
+{        
+    //LOGICA
+	private static boolean hasLoaded = false;
+	
+    public static String dbIp = "", dbPort = "", dbUsr = "", dbPwrd = "";
         
-        //LOGICA
-        public String dbIp = "", dbPort = "", dbUsr = "", dbPwrd = "";
-        
-        public String tbAdmins = "", tbCatalog = "", tbLog = "", tbUsers = "";
+    public static String tbAdmins = "", tbCatalog = "", tbLog = "", tbUsers = "";
 
-
-        Properties props = new Properties();
-        public void load() throws FileNotFoundException, IOException
-        {
-                props.load(new FileInputStream("res/config.properties"));
+    public static boolean load() throws FileNotFoundException, IOException
+    {
+		if (!hasLoaded){
+    		Properties props = new Properties();
+			props.load(new FileInputStream("res/config.properties"));
                 
-                dbIp = props.getProperty("db_ip");
-                dbPort = props.getProperty("db_port");
+			dbIp = props.getProperty("db_ip");
+			dbPort = props.getProperty("db_port");
                 
-                dbUsr = props.getProperty("db_user");
-                dbPwrd = props.getProperty("db_password");
-        }
+			dbUsr = props.getProperty("db_user");
+    		dbPwrd = props.getProperty("db_password");
+    		
+			hasLoaded = true;
+		}
+		
+		return hasLoaded;
+	}
 }

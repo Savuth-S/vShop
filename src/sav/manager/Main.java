@@ -1,54 +1,66 @@
-package main.java;
+package sav.manager;
+
+import com.sun.tools.javac.util.Log;
+
+import java.sql.SQLException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import java.util.logging.Logger;
 
+import javax.xml.catalog.Catalog;
+
+import sav.manager.Table;
+import sav.manager.tables.*;
+import sav.utils.Config;
+import sav.vshop.database.DbHelper;
+
 public class Main
 {
+	private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
 	//MAIN PROGRAM
 	public static void main(String[] args)
 	{
-    	Config config = new Config();
-		try { config.load();}
-		catch(Exception e) { e.printStackTrace();}
+		try{
+			if (makeDatabase()){
+				LOGGER.info("DATABASE MADE!");
+			}else{
+				LOGGER.severe("FAILED TO MAKE DATABASE");
+		}catch (SQLException e){ e.printStackTrace();}
+	}
 
-	    Database db = Database.makeInstance( 
-			new Database(
-				String.format("jdbc:mariadb://%s:%s/",
-        						config.dbIp, config.dbPort),
-				config.dbUsr,
-				config.dbPwrd
-			)
-		);
-		
-		try {
-		LOGGER.info("Cannot find database will try to make it");
+	private static boolean makeDatabase() throws SQLException
+	{	
+		AtomicBoolean isMade = true;
 
-				conn = DriverManager.getConnection(url, usr, pwd);
-				isConnected = make() && connect();
-				close();
-			} catch (SQLException e) {
-				LOGGER.severe("FAILED TO CREATE DATABASE", e);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		if (Config.load()){
+			try (DbHelper db = DbHelper.getInstance()){
+				if(db != null && !db.connect()){
+					LOGGER.info("Will try to make the database");
+					
+					db.setConnection(Config.url);
+					isMade = isMade && db.execute(String.format("CREATE DATABASE %s", DB_NAME)) != null;
+				}
 
-    	
-		Map<String, Table> tables = new HashMap<>();
-                tables.put("", new Users());
-                tables.put("TODOADM", new Admins());
-                // tables.put("", new Catalog());
-                tables.put("", new Log());
-
-	        try (Database db = Database.getInstance()){
-			if (db != null){
-				return db.init(tables);
+				if(isMade && db.connect()){				
+					AtomicBoolean areTablesMade = new AtomicBoolean(true);
+					Map<String, Table> tables = new HashMap<>();
+                	
+					tables.put(Config.tbNameUsrs, new Users());
+                	tables.put("TODOADM", new Admins());
+                	tables.put("", new Catalog());
+                	tables.put("", new Log());
+				
+		        	tables.forEach((nm, tb) -> areTablesMade.set(areTablesMade.get() && tb.create()));
+				
+					isMade = isMade && areTablesMade.get() && tables.get("TODOADM").entryExists(ID, "1");
+	
+				}
 			}
 		}
-
-		return false;
 	}
+
 }
