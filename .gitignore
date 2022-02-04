@@ -1,9 +1,8 @@
-/.idea/
-/out/
-.class
 /bin/
+/release/
 
-#Ignore eclipse project files
+#Shitty IDE files
+/.idea/
 .classpath
 
 #Misc

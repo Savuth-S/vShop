@@ -1,4 +1,4 @@
-package main.java.database;
+package main.java.manager;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 import java.util.logging.Logger;
 
-import main.java.database.Database;
+import main.java.database.DbHelper;
 
 public abstract class Table {
     private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
@@ -23,50 +23,48 @@ public abstract class Table {
 
 	public boolean create()
 	{
-	    try (Database db = Database.getInstance()){
-			if (db.execute(String.format(
-							"CREATE TABLE IF NOT EXISTS %s (%s %s)", 
-                        	tbName, getFieldsQuery(), getUniques())) != null){
-				return true;
-			}
+	    try (DbHelper db = DbHelper.getInstance()){
+			String sql = String.format("CREATE TABLE IF NOT EXISTS %s (%s %s)", tbName, getFieldsQuery(), getUniques());
+			
+			return db.execute(sql) != null;
 		}catch (SQLException e){ e.printStackTrace(); }
 
 		return false;
 	}
 	
         public ResultSet insert(String[] fields, Object[] data){
-	        try(Database db = Database.getInstance()) {
-		        String query = String.format("INSERT INTO %s (%s) VALUES (%s)",
-		                tbName,
-				formatFields(fields),
-				formatFieldsQueryCount(fields));
+//	        try(DbHelper db = DbHelper.getInstance()) {
+//		        String query = String.format("INSERT INTO %s (%s) VALUES (%s)",
+//		                tbName,
+//				formatFields(fields),
+//				formatFieldsQueryCount(fields));
 
-		        try (PreparedStatement insertValues = db.getConnection().prepareStatement(query)){
-			        for (int i = 0; i < formatFields(fields).split(",").length; i++){
-                                        if (data[i] instanceof byte[] bytes){
-                                                insertValues.setBytes(i+1, bytes);
-                                        }else if (data[i] instanceof Integer integer){
-                                                insertValues.setInt(i+1, integer);
-                                        }else if (data[i] instanceof String string){
-					        insertValues.setString(i+1, string);
-                                        }else{
-                                                LOGGER.warning(String.format("INSERT VALUE TYPE NOT FOUND: %s", data[i]));
-                                        }
-				}
-
-			        return insertValues.executeQuery();
-		        }catch (SQLException e){ LOGGER.warning(String.format("FAILED TO INSERT ENTRY: %s %nMESSAGE: %s", query, e.getMessage())); }
-                }
+//		        try (PreparedStatement insertValues = db.getConnection().prepareStatement(query)){
+//			        for (int i = 0; i < formatFields(fields).split(",").length; i++){
+//                                        if (data[i] instanceof byte[] bytes){
+//                                                insertValues.setBytes(i+1, bytes);
+//                                        }else if (data[i] instanceof Integer integer){
+//                                                insertValues.setInt(i+1, integer);
+//                                        }else if (data[i] instanceof String string){
+//					        insertValues.setString(i+1, string);
+//                                        }else{
+//                                                LOGGER.warning(String.format("INSERT VALUE TYPE NOT FOUND: %s", data[i]));
+//                                        }
+//				}
+//
+//			        return insertValues.executeQuery();
+//		        }catch (SQLException e){ LOGGER.warning(String.format("FAILED TO INSERT ENTRY: %s %nMESSAGE: %s", query, e.getMessage())); }
+//                }
 
 		return null;
 	}
 
 
 	protected abstract String getFieldsQuery();
-        
+
         protected boolean entryExists(String field, String value)
         {
-                try (Database db = Database.getInstance()) {
+                try (DbHelper db = DbHelper.getInstance()) {
 			return db.execute(String.format("SELECT * FROM %s WHERE %s = %s LIMIT 1", tbName, field, value)).first();
                 }catch (SQLException e) {
 			LOGGER.warning(String.format("FAILED TO CHECK FOR ENTRY %s", e.getMessage()));
@@ -74,7 +72,7 @@ public abstract class Table {
 
                 return false;
         }
-	
+
 	protected String getUniques(){ return String.format(", PRIMARY KEY(%s)",ID); }
 
         private String formatFields(String[] fields)

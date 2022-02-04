@@ -5,11 +5,9 @@ import java.util.Map;
 
 import java.util.logging.Logger;
 
-import javax.xml.catalog.Catalog;
-
-import main.java.database.Database;
-import main.java.database.Table;
-import main.java.database.tables.*;
+import main.java.database.DbHelper;
+import main.java.manager.Table;
+import main.java.manager.tables.*;
 import main.java.utils.Config;
 
 public class Main
@@ -22,12 +20,7 @@ public class Main
                 try{    config.load();
                 }catch(Exception e){ e.printStackTrace();}
 
-	        Database db = Database.getInstance( new Database(
-				String.format("jdbc:mariadb://%s:%s/",
-                                                            config.dbIp,
-                                                            config.dbPort),
-				config.dbUsr,
-				config.dbPwrd));
+	        DbHelper db = DbHelper.getInstance();
 		
 		if (init()) {
 		        Logger.getLogger(Main.class.getName())
@@ -48,7 +41,7 @@ public class Main
                 // tables.put("", new Catalog());
                 tables.put("", new Log());
 
-	        try (Database db = Database.getInstance()){
+	        try (DbHelper db = DbHelper.getInstance()){
 			if (db != null){
 				return db.init(tables);
 			}
