@@ -1,14 +1,11 @@
-package main.java.manager;
+package sav.manager;
 
-import java.sql.PreparedStatement;
+import sav.vshop.database.DbHelper;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.util.Arrays;
-
 import java.util.logging.Logger;
-
-import main.java.database.DbHelper;
 
 public abstract class Table {
     private static final Logger LOGGER = Logger.getLogger(Table.class.getName());

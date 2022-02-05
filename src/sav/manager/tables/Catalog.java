@@ -1,8 +1,8 @@
-package main.java.database.tables;
+package sav.manager.tables;
 
 import java.util.Arrays;
 
-import main.java.database.Table;
+import sav.manager.Table;
 
 public class Catalog extends Table
 { //POSIBLE FUTURO SINGLETON

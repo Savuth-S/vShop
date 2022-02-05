@@ -1,13 +1,12 @@
-package main.java.manager.tables;
+package sav.manager.tables;
 
 import java.util.Arrays;
 import java.util.UUID;
 
 import java.util.logging.Logger;
 
-import main.java.database.DbHelper;
-import main.java.manager.Table;
-import main.java.utils.Crypt;
+import sav.manager.Table;
+import sav.utils.Crypt;
 
 public class Admins extends Table
 {

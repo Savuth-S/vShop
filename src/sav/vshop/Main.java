@@ -1,14 +1,14 @@
-package main.java;
+package sav.vshop;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import java.util.logging.Logger;
 
-import main.java.database.DbHelper;
-import main.java.manager.Table;
-import main.java.manager.tables.*;
-import main.java.utils.Config;
+import sav.vshop.database.DbHelper;
+import sav.manager.Table;
+import sav.manager.tables.*;
+import sav.utils.Config;
 
 public class Main
 {
@@ -43,7 +43,7 @@ public class Main
 
 	        try (DbHelper db = DbHelper.getInstance()){
 			if (db != null){
-				return db.init(tables);
+				//return db.init(tables);
 			}
 		}
 

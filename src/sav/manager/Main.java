@@ -1,16 +1,17 @@
-package main.java.manager;
+package sav.manager;
+
+import sav.vshop.database.DbHelper;
+import main.java.utils.Config;
+import sav.manager.tables.Admins;
+import sav.manager.tables.Catalog;
+import sav.manager.tables.Log;
+import sav.manager.tables.Users;
 
 import java.sql.SQLException;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import java.util.logging.Logger;
-
-import main.java.manager.Table;
-import main.java.utils.Config;
-import main.java.database.DbHelper;
 
 public class Main
 {
@@ -39,7 +40,7 @@ public class Main
 					LOGGER.info("Will try to make the database");
 					
 					db.setConnection(Config.dbIp, Config.dbPort, "");
-					dbMade = db.execute(String.format("CREATE DATABASE %s", DB_NAME)) != null;
+					dbMade = db.execute(String.format("CREATE DATABASE %s", Config.dbName)) != null;
 				}else{
 					LOGGER.warning("DATABASE ALREADY EXISTS");
 					return false;
@@ -48,20 +49,20 @@ public class Main
 				if(dbMade && db.connect()){				
 					Map<String, Table> tables = new HashMap<>();
                 	
-					tables.put(Config.tbNameUsrs, new Users());
+					tables.put("", new Users());
                 	tables.put("TODOADM", new Admins());
                 	tables.put("", new Catalog());
                 	tables.put("", new Log());
 				
 		        	tables.forEach((nm, tb) -> tablesMade.set(tablesMade.get() && tb.create()));
 				
-					adminExists = tablesMade.get() ? tables.get("TODOADM").entryExists(ID, "1") : false;
+					adminExists = tablesMade.get() && tables.get("TODOADM").entryExists(Table.ID, "1");
 	
 				}
 			}
 		}
 
-		return loadConfig && dbMade && tablesMade && adminExists;
+		return loadConfig && dbMade && tablesMade.get() && adminExists;
 	}
 
 }

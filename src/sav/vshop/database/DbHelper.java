@@ -1,10 +1,10 @@
-package main.java.database;
+package sav.vshop.database;
 
 import java.util.logging.Logger;
 
 import java.sql.*;
 import java.util.*;
-import main.java.utils.Config;
+import sav.utils.Config;
 
 public class DbHelper implements AutoCloseable
 {

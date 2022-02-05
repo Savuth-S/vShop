@@ -1,4 +1,4 @@
-package main.java.manager.tables;
+package sav.manager.tables;
 
 import java.util.Arrays;
 
