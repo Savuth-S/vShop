@@ -12,7 +12,7 @@ public class Config
 	private static final Logger LOGGER = Logger.getLogger(Config.class.getName());
 
     //LOGICA
-	private static boolean hasLoaded = false;
+	private static boolean loaded = false;
 
 	public static String dbName = "";
     public static String dbIp = "", dbPort = "", dbUsr = "", dbPwrd = "";
@@ -21,7 +21,7 @@ public class Config
     public static boolean load()
     {
 		try{
-			if (!hasLoaded){
+			if (!loaded){
     			Properties props = new Properties();
 				props.load(new FileInputStream("res/config.properties"));
 
@@ -31,7 +31,7 @@ public class Config
 				dbUsr = props.getProperty("db_user");
 				dbPwrd = props.getProperty("db_password");
     		
-				hasLoaded = true;
+				loaded = true;
 			}
 		}catch (FileNotFoundException e){
 			LOGGER.severe(String.format("COULDN'T FIND CONDIG FILE: %s", e.getMessage()));
@@ -39,6 +39,6 @@ public class Config
 			LOGGER.severe(String.format("FAILED TO ACCES FILE: %s", e.getMessage()));
 		}
 
-		return hasLoaded;
+		return loaded;
 	}
 }

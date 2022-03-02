@@ -1,17 +1,21 @@
 package sav.manager;
 
-import sav.vshop.database.DbHelper;
+import java.sql.SQLException;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import java.util.logging.Logger;
+
+import jdk.javadoc.internal.doclets.formats.html.Table;
+
 import main.java.utils.Config;
 import sav.manager.tables.Admins;
 import sav.manager.tables.Catalog;
 import sav.manager.tables.Log;
 import sav.manager.tables.Users;
-
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
+import sav.vshop.database.DbHelper;
 
 public class Main
 {
@@ -29,10 +33,10 @@ public class Main
 
 	private static boolean makeDatabase() throws SQLException
 	{	
-		boolean loadConfig = Config.load();
-		boolean dbMade = false;
+		boolean loadConfig = Config.load(),
+				dbMade = false,
+				adminExists = false;
 		AtomicBoolean tablesMade = new AtomicBoolean(true);
-		boolean adminExists = false;
 
 		if (loadConfig){
 			try (DbHelper db = DbHelper.getInstance()){
@@ -43,7 +47,7 @@ public class Main
 					dbMade = db.execute(String.format("CREATE DATABASE %s", Config.dbName)) != null;
 				}else{
 					LOGGER.warning("DATABASE ALREADY EXISTS");
-					return false;
+					dbMade = true;
 				}
 
 				if(dbMade && db.connect()){				
