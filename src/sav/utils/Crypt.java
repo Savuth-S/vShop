@@ -8,34 +8,35 @@ import java.util.UUID;
 
 public class Crypt
 {
-        public static byte[] guidToBin(UUID guid)
+	public static byte[] uuidToBin(UUID uuid)
 	{
-		byte[] compressedGUID = new byte[16];
-		ByteBuffer.wrap(compressedGUID)
-				.order(ByteOrder.BIG_ENDIAN)
-				.putLong(guid.getMostSignificantBits())
-				.putLong(guid.getLeastSignificantBits());
+		byte[] compressedUUID = new byte[16];
+		ByteBuffer.wrap(compressedUUID)
+			.order(ByteOrder.BIG_ENDIAN)
+			.putLong(uuid.getMostSignificantBits())
+			.putLong(uuid.getLeastSignificantBits());
 
-		return compressedGUID;
+		return compressedUUID;
 	}
-        
-        public static UUID binToGUID(byte[] compressedGUID)
-        {
-                ByteBuffer buf = ByteBuffer.wrap(compressedGUID); 
 
-                return new UUID(buf.getLong(), buf.getLong());
-        }
+	public static UUID binToUUID(byte[] compressedGUID)
+	{
+		ByteBuffer buf = ByteBuffer.wrap(compressedGUID); 
 
-        public static byte[] hashPassword(String password, byte[] salt)
-        {
-                try{ MessageDigest md = MessageDigest.getInstance("SHA-256");
-                        md.update(salt);
-                        
-                        return md.digest(password.getBytes(StandardCharsets.UTF_8));
-                }catch (Exception e){
-                        e.printStackTrace();
-                }
+		return new UUID(buf.getLong(), buf.getLong());
+	}
 
-                return null;
-        }
+	public static byte[] hashPassword(String password, byte[] salt)
+	{
+		try{ 
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update(salt);
+
+			return md.digest(password.getBytes(StandardCharsets.UTF_8));
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+
+		return null;
+	}
 }

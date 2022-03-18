@@ -15,35 +15,33 @@ public class Catalog extends Table
 	private static final String COMPANY = "productora";
 	private static final String DIRECTOR = "director";
 	private static final String MAIN_CHAR = "protagonista";
-	private static final String[] FIELDS = new String[] {
-			ID,
-			GUID,
-			NAME,
-			RELEASE,
-			PLATFORM,
-			COMPANY,
-			DIRECTOR,
-			MAIN_CHAR
-	};
+	private static final String[] FIELDS = new String[] { 
+		ID, 
+		GUID, 
+		NAME,
+		RELEASE, 
+		PLATFORM, 
+		COMPANY, 
+		DIRECTOR, 
+		MAIN_CHAR };
 
 	public Catalog(){
 		setTableName(TB_NAME);
 		setFields(FIELDS);
 	}
-        
-        @Override
-        protected String getFieldsQuery()
+
+	@Override
+	protected String getFieldsQuery()
 	{
-	        StringBuilder sb = new StringBuilder();
-	        Arrays.stream(FIELDS).forEach(s -> {
-                        switch(s){
-                                case ID -> sb.append(String.format("%s int AUTO_INCREMENT", s));
-                                case GUID -> sb.append(String.format(", %s BINARY(16) NOT NULL", s));
-                                default -> sb.append(String.format(", %s VARCHAR(30) NOT NULL", s));
-                        }
-	        });
-                
-	        return sb.toString();
+		StringBuilder sb = new StringBuilder();
+		Arrays.stream(FIELDS).forEach(s -> {
+			switch(s){
+				case ID -> sb.append(String.format("%s int AUTO_INCREMENT", s));
+				case GUID -> sb.append(String.format(", %s BINARY(16) NOT NULL", s));
+				default -> sb.append(String.format(", %s VARCHAR(30) NOT NULL", s)); }
+		});
+
+		return sb.toString();
 	}
 
 	@Override

@@ -2,19 +2,17 @@ package sav.manager;
 
 import java.sql.SQLException;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import java.util.logging.Logger;
 
-import jdk.javadoc.internal.doclets.formats.html.Table;
-
-import main.java.utils.Config;
+import java.util.*;
+import sav.manager.Table;
 import sav.manager.tables.Admins;
 import sav.manager.tables.Catalog;
 import sav.manager.tables.Log;
 import sav.manager.tables.Users;
+import sav.vshop.Config;
 import sav.vshop.database.DbHelper;
 
 public class Main
@@ -35,38 +33,46 @@ public class Main
 	{	
 		boolean loadConfig = Config.load(),
 				dbMade = false,
-				adminExists = false;
-		AtomicBoolean tablesMade = new AtomicBoolean(true);
+				tbMade = false;
 
 		if (loadConfig){
 			try (DbHelper db = DbHelper.getInstance()){
-				if(!db.connect()){
-					LOGGER.info("Will try to make the database");
-					
-					db.setConnection(Config.dbIp, Config.dbPort, "");
-					dbMade = db.execute(String.format("CREATE DATABASE %s", Config.dbName)) != null;
-				}else{
-					LOGGER.warning("DATABASE ALREADY EXISTS");
+				if (db.getConnection().isValid(30)) {
+					LOGGER.warning(String.format("DATABASE ALREADY EXISTS: %s %nCONNECTION: %s", Config.dbName, db.connect()));
 					dbMade = true;
+				}else{
+					LOGGER.info("Making database...");
+					db.setConnection("");
+					dbMade = db.execute(String.format("CREATE DATABASE %s", Config.dbName)) != null;
+					
+					db.setConnection(Config.dbName);
 				}
-
-				if(dbMade && db.connect()){				
-					Map<String, Table> tables = new HashMap<>();
-                	
-					tables.put("", new Users());
-                	tables.put("TODOADM", new Admins());
-                	tables.put("", new Catalog());
-                	tables.put("", new Log());
 				
-		        	tables.forEach((nm, tb) -> tablesMade.set(tablesMade.get() && tb.create()));
-				
-					adminExists = tablesMade.get() && tables.get("TODOADM").entryExists(Table.ID, "1");
-	
-				}
+				tbMade = makeTables(db);
 			}
 		}
 
-		return loadConfig && dbMade && tablesMade.get() && adminExists;
+		return loadConfig && dbMade && tbMade;
 	}
 
+	private static boolean makeTables(DbHelper db)
+	{
+		AtomicBoolean tablesMade = new AtomicBoolean(true);
+		boolean adminExists = false;
+
+		if(db.connect()){				
+			List<Table> tables = new ArrayList<>();
+                	
+			tables.add(new Users()); //0
+            tables.add(new Admins()); //1
+            tables.add(new Catalog()); //2
+        	tables.add(new Log()); //3
+				
+		    tables.forEach((tb) -> tablesMade.set(tablesMade.get() && tb.create()));
+				
+			adminExists = tablesMade.get() && tables.get(1).entryExists(tables.get(1).ID, "1");
+		}
+
+		return false;
+	}
 }

@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import sav.manager.Table;
 
-public class Log extends Table
+
 { //POSIBLE FUTURO SINGLETON
 	private static final String TB_NAME = "registro";
 

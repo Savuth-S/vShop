@@ -1,10 +1,12 @@
 package sav.vshop.database;
 
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+
 import java.util.logging.Logger;
 
 import java.sql.*;
-import java.util.*;
-import sav.utils.Config;
+import sav.vshop.Config;
 
 public class DbHelper implements AutoCloseable
 {
@@ -17,10 +19,10 @@ public class DbHelper implements AutoCloseable
 	{
 		if (database == null){
 			database =  new DbHelper();
-
-
 		}
 
+		Config.load();
+		
 		database.connect();
 		return database;
 	}
@@ -33,11 +35,19 @@ public class DbHelper implements AutoCloseable
 	private static final String PWD = Config.dbPwrd;
 	
 	private Connection conn = null;
-	public void setConnection(String ip, String port, String database)
+	public Connection getConnection() throws NoSuchElementException
+	{
+		if (conn == null){
+			throw new NoSuchElementException();
+		}
+		
+		return conn;
+	}
+	public void setConnection(String database)
 	{
 		try {
 			conn = DriverManager.getConnection(
-					String.format("jdbc:mariadb://%s:%s/%s", ip, port, database),
+					String.format("%s%s", URL, database),
 					USR,
 					PWD
 				);
@@ -51,24 +61,15 @@ public class DbHelper implements AutoCloseable
 		boolean isConnected = false;
 
 		try{
-			if (conn == null){
+			if (conn == null || conn.isClosed() || !conn.isValid(30)){
 				conn = DriverManager.getConnection(URL + DB_NAME, USR, PWD);
 			}
 
-			if (conn.isClosed()){
-				conn = DriverManager.getConnection(URL + DB_NAME, USR, PWD);
-			}
-
-			if (!conn.isValid(30)){
-				conn = DriverManager.getConnection(URL + DB_NAME, USR, PWD);
-			}
-
-			isConnected = conn.isValid(30) ;
-		
+			isConnected = conn.isValid(30);	
 		}catch (SQLException e){ 
 			LOGGER.severe(String.format("CANNOT CONNECT TO DATABASE: %s", e.getMessage()));
 		}catch (Exception e){ 
-			e.printStackTrace(); 
+		 	e.printStackTrace(); 
 		}
 
 		return isConnected;
@@ -105,12 +106,12 @@ public class DbHelper implements AutoCloseable
 
 		try (PreparedStatement insertValues = conn.prepareStatement(query)){
 			for (int i = 0; i < fields.length; i++){
-				if (data[i] instanceof byte[] bytes) {
-					insertValues.setBytes(i + 1, bytes);
-				} else if (data[i] instanceof Integer integer) {
-					insertValues.setInt(i + 1, integer);
-				} else if (data[i] instanceof String string) {
-					insertValues.setString(i + 1, string);
+				if (data[i] instanceof byte[]) {
+					insertValues.setBytes(i + 1, (byte[]) data[i]);
+				} else if (data[i] instanceof Integer) {
+					insertValues.setInt(i + 1, (Integer) data[i]);
+				} else if (data[i] instanceof String) {
+					insertValues.setString(i + 1, (String) data[i]);
 				} else {
 					LOGGER.warning(String.format("INSERT VALUE TYPE NOT FOUND: %s", data[i]));
 				}

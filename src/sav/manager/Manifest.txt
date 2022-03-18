@@ -1,0 +1,2 @@
+Main-Class: sav.manager.Main
+Class-Path: mariadb.jar sav-utils.jar vshop.jar
