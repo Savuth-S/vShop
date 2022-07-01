@@ -1,2 +1,0 @@
-Main-Class: sav.vshop.Main
-Class-Path: mariadb-java-client.jar
